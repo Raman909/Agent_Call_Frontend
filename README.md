@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# Agent Vox 🎙️🤖
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Agent Vox** is a modern, multi-tenant SaaS application that enables users to configure, manage, and deploy custom AI voice assistants. Integrating **Gemini Flash Native Audio**, **LiveKit**, and **Twilio**, users can build dedicated agents powered by customizable personalities, instructions, and contextual knowledge from uploaded PDFs.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+* **Authentication & Security:** Secure JWT-based Authentication system for user-isolated agent configurations and Twilio credentials.
+* **Telephony Integration:** Seamless bridging of Twilio voice calls via SIP into LiveKit rooms using Dynamic Routing constraints based on user credentials.
+* **Custom AI Personalities:** Define agent names, distinct greeting messages, and comprehensive system prompts.
+* **Retrieval-Augmented Generation (RAG):** Drag-and-drop PDF upload functionality. The AI reads uploaded user documents on-the-fly and references them heavily during live voice calls.
+* **Stripe Integrations:** Agents can be given instructions to dynamically dispatch generated Stripe payment links straight into customer emails mid-conversation!
+* **Stunning UI/UX:** Built on React and Framer Motion with an elegant, responsive Dark Mode glassmorphic design language.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠 Tech Stack
 
-## Expanding the ESLint configuration
+**Frontend Framework:** React 18 / Vite / TypeScript
+**Styling:** Tailwind CSS, Framer Motion, Lucide Icons
+**Routing & HTTP:** React Router DOM, Axios
+**Backend Architecture (Remote/LAN):** Node.js, Express, MongoDB
+**AI & RTC Dependencies:** `@google/generative-ai`, `livekit-server-sdk`, `twilio`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 💻 Running the Frontend Locally
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
+* Node.js (v18+ recommended)
+* The Agent Vox Backend instance actively running (locally or on the LAN network)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Installation
+
+Clone the repository and install dependencies in the frontend directory:
+
+```bash
+cd agent_vox/frontend
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file in the root of the `frontend` directory. Assuming your backend is running on a teammate's machine on the local network at `http://192.168.1.138:5000` (or `http://localhost:5000` if local):
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_API_URL=http://192.168.1.138:5000/api
 ```
+
+### 3. Start Development Server
+
+```bash
+npm run dev
+```
+
+Visit the outputted local port (e.g. `http://localhost:5173`).
+
+---
+
+## 📂 Project Navigation
+
+* `src/pages/Login.tsx` & `Register.tsx` — Public auth gateways.
+* `src/components/ProtectedRoute.tsx` — Restricts access based on the `target auth user`.
+* `src/context/AuthContext.tsx` — Cross-app persistence of the JWT Auth Token and standard Profile logic.
+* `src/api/axios.ts` — Global interceptor to automatically attach authorization Bearer headers and gracefully route requests to `import.meta.env.VITE_API_URL`.
+* `src/pages/Dashboard.tsx` — Management UI for Twilio Voice bindings and configuration properties.
+* `src/pages/AgentConfig.tsx` — Defines voice tone and rules constraints mapping to MongoDB IDs.
+* `src/pages/KnowledgeBase.tsx` — Form data POST processing resolving uploaded PDFs directly into the user's specific Voice Agent's context.
+
+---
+
+## 🤝 Collaboration
+
+The application handles Dynamic Multi-Tenant configurations across nodes.
+
+1. **New Users**: When registering, you log in securely.
+2. **Setup your agent**: Create boundaries and context.
+3. **Bring Your Own Twilio**: Every user has their own Twilio Webhook attached to their specific Twilio Number.
+4. **SIP Handshake**: The user dials the number, Twilio hits the backend, the backend figures out exactly *whose* agent it is and invokes an isolated LiveKit Cloud thread for them on-demand!

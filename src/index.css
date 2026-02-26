@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-textMain font-sans antialiased;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-surface/80 backdrop-blur-md border border-white/5 rounded-2xl shadow-xl;
+  }
+
+  .input-field {
+    @apply w-full bg-surfaceHighlight border border-white/10 rounded-lg px-4 py-2 text-textMain focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-textMuted;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-primaryHover text-white font-medium py-2 px-6 rounded-lg transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-surfaceHighlight hover:bg-white/10 text-textMain font-medium py-2 px-6 rounded-lg transition-all active:scale-95 border border-white/5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}

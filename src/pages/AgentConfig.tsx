@@ -40,7 +40,7 @@ const AgentConfig = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await api.post('/Agent', {
+            await api.post('/agents', {
                 name: config.name,
                 prompt: config.prompt,
                 greeting: config.greeting, // Sending fallback property names just in case backend expects them
@@ -49,7 +49,6 @@ const AgentConfig = () => {
                 greetingMessage: config.greeting
             });
             setIsSaved(true);
-            // {isSaved && <span className="text-accent text-sm font-medium">Configuration saved!</span>}
             setTimeout(() => setIsSaved(false), 3000);
         } catch (error) {
             console.error('Failed to save agent config', error);
@@ -69,7 +68,7 @@ const AgentConfig = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 glass-panel p-8">
-                    <form className="space-y-6">
+                    <form onSubmit={handleSave} className="space-y-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-textMuted flex items-center gap-2">
                                 <Bot className="w-4 h-4" /> Agent Name
@@ -112,10 +111,9 @@ const AgentConfig = () => {
                         </div>
 
                         <div className="pt-4 flex items-center justify-end gap-4">
-                            
+                            {isSaved && <span className="text-accent text-sm font-medium">Configuration saved!</span>}
                             <button
-                                onClick={handleSave}
-                                // type="submit"
+                                type="submit"
                                 className="btn-primary"
                                 disabled={isLoading}
                             >
@@ -126,7 +124,7 @@ const AgentConfig = () => {
                                 )}
                             </button>
                         </div>
-                        
+
                     </form>
                 </div>
 

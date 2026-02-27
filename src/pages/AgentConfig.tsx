@@ -13,27 +13,27 @@ const AgentConfig = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
 
-    useEffect(() => {
-        const fetchAgent = async () => {
-            try {
-                const response = await api.get('/agents');
-                // The backend could return an array of agents or a single agent object. Adapt to both possibilities.
-                const agents = response.data.agents || response.data;
-                const agent = Array.isArray(agents) && agents.length > 0 ? agents[0] : (agents.agentName ? agents : null);
+    // useEffect(() => {
+    //     const fetchAgent = async () => {
+    //         try {
+    //             const response = await api.get('/agents');
+    //             // The backend could return an array of agents or a single agent object. Adapt to both possibilities.
+    //             const agents = response.data.agents || response.data;
+    //             const agent = Array.isArray(agents) && agents.length > 0 ? agents[0] : (agents.agentName ? agents : null);
 
-                if (agent) {
-                    setConfig({
-                        name: agent.agentName || agent.name || 'Customer Support Bot',
-                        prompt: agent.systemPrompt || agent.prompt || '',
-                        greeting: agent.greetingMessage || agent.greeting || '',
-                    });
-                }
-            } catch (error) {
-                console.error('Failed to fetch agent', error);
-            }
-        };
-        fetchAgent();
-    }, []);
+    //             if (agent) {
+    //                 setConfig({
+    //                     name: agent.agentName || agent.name || 'Customer Support Bot',
+    //                     prompt: agent.systemPrompt || agent.prompt || '',
+    //                     greeting: agent.greetingMessage || agent.greeting || '',
+    //                 });
+    //             }
+    //         } catch (error) {
+    //             console.error('Failed to fetch agent', error);
+    //         }
+    //     };
+    //     fetchAgent();
+    // }, []);
 
     const handleSave = async (e: React.FormEvent) => {
         console.log("handle save is called")

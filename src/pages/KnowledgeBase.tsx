@@ -50,7 +50,7 @@ const KnowledgeBase = () => {
             }
 
             const formData = new FormData();
-            formData.append('pdf', file);
+            formData.append('file', file);
 
             // Upload using the specific agentId interpolation
             const response = await api.post(`/agents/${agent._id}/upload-pdf`, formData, {

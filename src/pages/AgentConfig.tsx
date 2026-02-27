@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Bot, MessageSquare, TerminalSquare } from 'lucide-react';
 import api from '../api/axios';
+import { log } from 'console';
 
 const AgentConfig = () => {
     const [config, setConfig] = useState({
@@ -35,6 +36,7 @@ const AgentConfig = () => {
     }, []);
 
     const handleSave = async (e: React.FormEvent) => {
+        console.log("handle save is called")
         e.preventDefault();
         setIsLoading(true);
         try {
@@ -122,6 +124,7 @@ const AgentConfig = () => {
                                 )}
                             </button>
                         </div>
+
                     </form>
                 </div>
 

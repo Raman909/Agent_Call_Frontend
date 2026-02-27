@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Save, Phone, Key, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Save, Phone, Key, Shield, LogOut } from 'lucide-react';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
   const [credentials, setCredentials] = useState({
     accountSid: '',
     authToken: '',
@@ -49,11 +54,22 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-3xl mx-auto animation-fade-in">
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold tracking-tight mb-3">Twilio Configuration</h1>
-        <p className="text-textMuted text-lg">
-          Connect your Twilio account to enable telephony features for your AI agents.
-        </p>
+      <div className="mb-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight mb-3">Twilio Configuration</h1>
+          <p className="text-textMuted text-lg">
+            Connect your Twilio account to enable telephony features for your AI agents.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            logout();
+            navigate('/login');
+          }}
+          className="btn-secondary text-red-400 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/30 whitespace-nowrap"
+        >
+          <LogOut className="w-4 h-4 mr-1" /> Logout
+        </button>
       </div>
 
       <div className="glass-panel p-8">

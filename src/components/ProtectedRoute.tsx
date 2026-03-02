@@ -13,7 +13,7 @@ export const ProtectedRoute = () => {
     }
 
     if (!isAuthenticated) {
-        console.log("User Authentication",isAuthenticated)
+        // console.log("User Authentication",isAuthenticated)
         return <Navigate to="/login" replace />;
     }
 

@@ -12,48 +12,77 @@ const AgentConfig = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
+    const [agents, setAgents] = useState([]);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    // useEffect(() => {
-    //     const fetchAgent = async () => {
-    //         try {
-    //             const response = await api.get('/agents');
-    //             // The backend could return an array of agents or a single agent object. Adapt to both possibilities.
-    //             const agents = response.data.agents || response.data;
-    //             const agent = Array.isArray(agents) && agents.length > 0 ? agents[0] : (agents.agentName ? agents : null);
+    // Fetch existing agents on component mount
+    useEffect(() => {
+        fetchAgents();
+    }, []);
 
-    //             if (agent) {
-    //                 setConfig({
-    //                     name: agent.agentName || agent.name || 'Customer Support Bot',
-    //                     prompt: agent.systemPrompt || agent.prompt || '',
-    //                     greeting: agent.greetingMessage || agent.greeting || '',
-    //                 });
-    //             }
-    //         } catch (error) {
-    //             console.error('Failed to fetch agent', error);
-    //         }
-    //     };
-    //     fetchAgent();
-    // }, []);
+    const fetchAgents = async () => {
+        try {
+            const response = await api.get('/agents');
+            setAgents(response.data.agents);
+        } catch (error) {
+            console.error('Failed to fetch agents', error);
+        }
+    };
+
+
 
     const handleSave = async (e: React.FormEvent) => {
-        console.log("handle save is called")
         e.preventDefault();
         setIsLoading(true);
+
         try {
-            await api.post('/agents', {
-                name: config.name,
-                prompt: config.prompt,
-                greeting: config.greeting, // Sending fallback property names just in case backend expects them
-                agentName: config.name,
-                systemPrompt: config.prompt,
-                greetingMessage: config.greeting
+            if (editingId) {
+                await api.put(`/agents/${editingId}`, {
+                    name: config.name,
+                    systemPrompt: config.prompt,
+                    greeting: config.greeting
+                });
+            } else {
+                await api.post('/agents', {
+                    name: config.name,
+                    systemPrompt: config.prompt,
+                    greeting: config.greeting
+                });
+            }
+
+            setEditingId(null);
+            setConfig({
+                name: '',
+                prompt: '',
+                greeting: ''
             });
+
+            fetchAgents();
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 3000);
+
         } catch (error) {
             console.error('Failed to save agent config', error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleEdit = (agent: any) => {
+        setEditingId(agent._id);
+        setConfig({
+            name: agent.name,
+            prompt: agent.systemPrompt,
+            greeting: agent.greeting
+        });
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            await api.delete(`/agents/${id}`);
+            fetchAgents();
+        } catch (error) {
+            console.error("Failed to delete agent", error);
         }
     };
 
@@ -147,6 +176,39 @@ const AgentConfig = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Your Agents</h2>
+
+                <div className="space-y-4">
+                    {agents.map((agent: any) => (
+                        <div key={agent._id} className="glass-panel p-4 flex justify-between items-center">
+                            <div>
+                                <h3 className="font-semibold text-lg">{agent.name}</h3>
+                                <p className="text-sm text-textMuted">
+                                    {agent.greeting}
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => handleEdit(agent)}
+                                    className="btn-secondary"
+                                >
+                                    Edit
+                                </button>
+
+                                <button
+                                    onClick={() => handleDelete(agent._id)}
+                                    className="btn-danger"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

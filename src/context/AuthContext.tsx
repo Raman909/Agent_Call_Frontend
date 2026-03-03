@@ -24,21 +24,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const initializeAuth = async () => {
+        const initializeAuth = () => {
             const storedToken = localStorage.getItem('token');
-            if (storedToken) {
-                try {
-                    // Temporarily mock user restore to avoid boot-block before api proxy is live
-                    // In Phase 4, we will hit /api/users/me with Axios here.
-                    const storedUser = localStorage.getItem('user');
-                    if (storedUser) {
-                        setUser(JSON.parse(storedUser));
-                    }
-                } catch (error) {
-                    console.error('Failed to restore auth', error);
-                    logout();
-                }
+            const storedUser = localStorage.getItem('user');
+
+            if (storedToken && storedUser) {
+                setToken(storedToken);
+                setUser(JSON.parse(storedUser));
             }
+
             setIsLoading(false);
         };
 

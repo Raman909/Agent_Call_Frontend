@@ -1,124 +1,103 @@
 import { useState, useCallback, useEffect } from 'react';
-import { UploadCloud, FileText } from 'lucide-react';
+import { UploadCloud, FileText, X } from 'lucide-react';
 import api from '../api/axios';
 
 const KnowledgeBase = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const [kbs, setKbs] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
   const [selectedAgent, setSelectedAgent] = useState("");
 
-// =========================
-// ✅ FETCH DATA (FIXED)
-// =========================
-useEffect(() => {
-  const loadData = async () => {
-    const token = localStorage.getItem("token");
+  // =========================
+  // FETCH DATA
+  // =========================
+  useEffect(() => {
+    const loadData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    if (!token) {
-      console.log("⛔ No token found, skipping API calls");
-      return;
-    }
+      try {
+        await Promise.all([fetchKB(), fetchAgents()]);
+      } catch {
+        setTimeout(loadData, 500);
+      }
+    };
 
+    loadData();
+  }, []);
+
+  const fetchKB = async () => {
     try {
-      await Promise.all([fetchKB(), fetchAgents()]);
-    } catch (err) {
-      console.log("⚠️ Initial fetch failed, retrying...");
-      setTimeout(loadData, 500); // retry once
+      const res = await api.get("/agents/kb");
+      setKbs(res.data.kbs || []);
+    } catch (err: any) {
+      console.error(err.response?.data || err.message);
     }
   };
 
-  loadData();
-}, []);
+  const fetchAgents = async () => {
+    try {
+      const res = await api.get("/agents");
+      setAgents(res.data.agents || []);
+    } catch (err: any) {
+      console.error(err.response?.data || err.message);
+    }
+  };
 
-// =========================
-// ✅ FETCH KB
-// =========================
-const fetchKB = async () => {
-  try {
-    const res = await api.get("/agents/kb");
-
-    console.log("✅ KB RESPONSE:", res.data);
-
-    setKbs(res.data.kbs || []);
-  } catch (err: any) {
-    console.error(
-      "❌ KB ERROR:",
-      err.response?.data || err.message
-    );
-  }
-};
-
-// =========================
-// ✅ FETCH AGENTS
-// =========================
-const fetchAgents = async () => {
-  try {
-    const res = await api.get("/agents");
-
-    console.log("✅ AGENTS RESPONSE:", res.data);
-
-    setAgents(res.data.agents || []);
-  } catch (err: any) {
-    console.error(
-      "❌ AGENTS ERROR:",
-      err.response?.data || err.message
-    );
-  }
-};
-
-// =========================
-// ✅ FILE HANDLING (IMPROVED)
-// =========================
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files && e.target.files[0]) {
-    const selectedFile = e.target.files[0];
+  // =========================
+  // FILE HANDLING
+  // =========================
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
 
     if (selectedFile.type !== "application/pdf") {
-      alert("Only PDF files are allowed ❌");
+      alert("Only PDF files allowed");
       return;
     }
 
     setFile(selectedFile);
-  }
-};
+    setUploadProgress(0);
+  };
 
-const handleDragOver = useCallback((e: React.DragEvent) => {
-  e.preventDefault();
-  setIsDragging(true);
-}, []);
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
 
-const handleDragLeave = useCallback((e: React.DragEvent) => {
-  e.preventDefault();
-  setIsDragging(false);
-}, []);
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
 
-const handleDrop = useCallback((e: React.DragEvent) => {
-  e.preventDefault();
-  setIsDragging(false);
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
 
-  const droppedFile = e.dataTransfer.files[0];
+    const droppedFile = e.dataTransfer.files[0];
+    if (!droppedFile) return;
 
-  if (!droppedFile) return;
+    if (droppedFile.type !== "application/pdf") {
+      alert("Only PDF files allowed");
+      return;
+    }
 
-  if (droppedFile.type !== "application/pdf") {
-    alert("Only PDF files are allowed ❌");
-    return;
-  }
-
-  setFile(droppedFile);
-}, []);
+    setFile(droppedFile);
+    setUploadProgress(0);
+  }, []);
 
   // =========================
-  // ✅ UPLOAD
+  // UPLOAD WITH PROGRESS
   // =========================
   const handleUpload = async () => {
     if (!file) return;
 
     setIsUploading(true);
+    setUploadProgress(0);
 
     try {
       const formData = new FormData();
@@ -126,21 +105,34 @@ const handleDrop = useCallback((e: React.DragEvent) => {
 
       const res = await api.post("/agents/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total || 1)
+          );
+          setUploadProgress(percent);
+        },
       });
 
-      alert(res.data.message || "Uploaded successfully");
-
-      setFile(null);
-      fetchKB(); // refresh list
+      if (res.data.message) {
+        setUploadProgress(100);
+        fetchKB();
+      }
     } catch (err: any) {
       alert(err.response?.data?.message || "Upload failed");
+      setUploadProgress(0);
     } finally {
       setIsUploading(false);
     }
   };
 
+  const handleRemove = () => {
+    setFile(null);
+    setUploadProgress(0);
+    setIsUploading(false);
+  };
+
   // =========================
-  // ✅ ATTACH KB
+  // ATTACH KB
   // =========================
   const attachKB = async (kbId: string) => {
     if (!selectedAgent) {
@@ -174,12 +166,11 @@ const handleDrop = useCallback((e: React.DragEvent) => {
         </p>
       </div>
 
-      {/* UPLOAD BOX */}
+      {/* UPLOAD */}
       <div className="glass-panel p-1 rounded-3xl mb-8">
         <div
           className={`border-2 border-dashed rounded-2xl p-10 text-center
-          ${isDragging ? "border-primary bg-primary/10" : "border-white/10"}
-        `}
+          ${isDragging ? "border-primary bg-primary/10" : "border-white/10"}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -192,20 +183,38 @@ const handleDrop = useCallback((e: React.DragEvent) => {
                 {(file.size / 1024 / 1024).toFixed(2)} MB
               </p>
 
+              {/* Progress */}
+              {(isUploading || uploadProgress === 100) && (
+                <div className="w-full mb-4">
+                  <div className="w-full bg-white/10 h-2 rounded-full">
+                    <div
+                      className="bg-primary h-2"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-sm mt-2">
+                    {isUploading
+                      ? `Uploading... ${uploadProgress}%`
+                      : "Upload Complete ✅"}
+                  </p>
+                </div>
+              )}
+
               <div className="flex justify-center gap-3">
-                <button
-                  onClick={() => setFile(null)}
-                  className="btn-secondary"
-                >
-                  Remove
+                <button onClick={handleRemove} className="btn-secondary">
+                  <X className="w-4 h-4" /> Remove
                 </button>
 
                 <button
                   onClick={handleUpload}
                   className="btn-primary"
-                  disabled={isUploading}
+                  disabled={isUploading || uploadProgress === 100}
                 >
-                  {isUploading ? "Uploading..." : "Upload"}
+                  {isUploading
+                    ? "Uploading..."
+                    : uploadProgress === 100
+                    ? "Uploaded"
+                    : "Upload"}
                 </button>
               </div>
             </>
@@ -213,9 +222,7 @@ const handleDrop = useCallback((e: React.DragEvent) => {
             <>
               <UploadCloud className="mx-auto mb-4 text-textMuted" size={40} />
               <p className="mb-2">Drag & drop PDF here</p>
-              <p className="text-sm text-textMuted mb-4">
-                or click below
-              </p>
+              <p className="text-sm text-textMuted mb-4">or click below</p>
 
               <label className="btn-primary cursor-pointer">
                 Browse File
@@ -232,62 +239,29 @@ const handleDrop = useCallback((e: React.DragEvent) => {
       </div>
 
       {/* AGENT SELECT */}
-      <div className="mb-8">
-        <label className="block mb-2 text-sm text-textMuted">
-          Select Agent
-        </label>
-
-        <select
-          value={selectedAgent}
-          onChange={(e) => setSelectedAgent(e.target.value)}
-          className="w-full p-3 rounded-xl bg-surfaceHighlight border border-white/10 text-white"
-        >
-          <option value="">Select an agent</option>
-          {agents.map((agent) => (
-            <option key={agent._id} value={agent._id}>
-              {agent.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <select
+        value={selectedAgent}
+        onChange={(e) => setSelectedAgent(e.target.value)}
+        className="w-full p-3 mb-6 rounded-xl bg-surfaceHighlight"
+      >
+        <option value="">Select Agent</option>
+        {agents.map((a) => (
+          <option key={a._id} value={a._id}>
+            {a.name}
+          </option>
+        ))}
+      </select>
 
       {/* KB LIST */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">
-          Your Knowledge Bases
-        </h2>
-
-        {kbs.length === 0 ? (
-          <div className="text-center py-10 border border-dashed border-white/10 rounded-xl">
-            <p className="text-textMuted">No KB uploaded yet</p>
+      <div className="grid gap-4">
+        {kbs.map((kb) => (
+          <div key={kb._id} className="flex justify-between p-4 bg-surfaceHighlight rounded-xl">
+            <span>{kb.fileName}</span>
+            <button onClick={() => attachKB(kb._id)} className="text-green-400">
+              Attach
+            </button>
           </div>
-        ) : (
-          <div className="grid gap-4">
-            {kbs.map((kb) => (
-              <div
-                key={kb._id}
-                className="p-4 rounded-xl bg-surfaceHighlight border border-white/10 flex justify-between items-center"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="text-primary" size={18} />
-                  <div>
-                    <p className="font-medium">{kb.fileName}</p>
-                    <p className="text-xs text-textMuted">
-                      {new Date(kb.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => attachKB(kb._id)}
-                  className="text-green-400 text-sm hover:underline"
-                >
-                  Attach
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        ))}
       </div>
     </div>
   );

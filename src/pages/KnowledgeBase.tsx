@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { UploadCloud, FileText, X } from 'lucide-react';
+import { UploadCloud, FileText, X, Trash2 } from 'lucide-react';
 import api from '../api/axios';
 
 const KnowledgeBase = () => {
@@ -153,6 +153,22 @@ const KnowledgeBase = () => {
   };
 
   // =========================
+  // DELETE KB
+  // =========================
+  const deleteKB = async (kbId: string) => {
+    if (!window.confirm("Are you sure you want to delete this file?")) return;
+
+    try {
+      await api.delete(`/agents/kb/${kbId}`);
+      // Refresh the list after deletion
+      setKbs(prev => prev.filter(kb => kb._id !== kbId));
+      alert("Deleted successfully");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Delete failed");
+    }
+  };
+
+  // =========================
   // UI
   // =========================
   return (
@@ -213,8 +229,8 @@ const KnowledgeBase = () => {
                   {isUploading
                     ? "Uploading..."
                     : uploadProgress === 100
-                    ? "Uploaded"
-                    : "Upload"}
+                      ? "Uploaded"
+                      : "Upload"}
                 </button>
               </div>
             </>
@@ -253,13 +269,31 @@ const KnowledgeBase = () => {
       </select>
 
       {/* KB LIST */}
+      {/* KB LIST */}
       <div className="grid gap-4">
         {kbs.map((kb) => (
-          <div key={kb._id} className="flex justify-between p-4 bg-surfaceHighlight rounded-xl">
-            <span>{kb.fileName}</span>
-            <button onClick={() => attachKB(kb._id)} className="text-green-400">
-              Attach
-            </button>
+          <div key={kb._id} className="flex justify-between items-center p-4 bg-surfaceHighlight rounded-xl border border-white/5">
+            <div className="flex items-center gap-3">
+              <FileText className="text-textMuted w-4 h-4" />
+              <span className="font-medium">{kb.fileName}</span>
+            </div>
+
+            <div className="flex gap-4 items-center">
+              <button
+                onClick={() => attachKB(kb._id)}
+                className="text-sm font-semibold text-primary hover:opacity-80 transition-opacity"
+              >
+                Attach
+              </button>
+
+              <button
+                onClick={() => deleteKB(kb._id)}
+                className="text-sm font-semibold text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+              >
+                <Trash2 size={14} />
+                Delete
+              </button>
+            </div>
           </div>
         ))}
       </div>

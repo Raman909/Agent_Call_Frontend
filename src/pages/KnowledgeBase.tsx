@@ -59,15 +59,10 @@ const KnowledgeBase = () => {
                 },
             });
 
-            if (response.data.message) {
-                setUploadProgress(100);
-            } else {
-                alert('Upload failed');
-            }
+            setUploadProgress(100);
 
-        } catch (error: any) {
-            console.error('Failed to upload knowledge base', error);
-            alert(error.response?.data?.message || 'Upload failed');
+        } catch {
+            // axios interceptor handles error toasts
             setUploadProgress(0);
         } finally {
             setIsUploading(false);

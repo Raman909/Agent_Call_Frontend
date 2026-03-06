@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 // Create base instance
 const api = axios.create({
@@ -20,5 +21,21 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+//global response interceptor to handle success and error messages using react-hot-toast
+api.interceptors.response.use(
+  (response)=>{
+    const message = response.data?.message;
+    if(message){
+      toast.success(message);
+    }
+    return response;
+  },
+  (error)=>{
+    const message = error.response?.data?.message || "Something went wrong";
+    toast.error(message);
+    return Promise.reject(error);
+  }
+)
 
 export default api;

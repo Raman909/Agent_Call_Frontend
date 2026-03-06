@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Bot, BookOpen, LogOut } from 'lucide-react';
+import { LayoutDashboard, Bot, BookOpen, User, Settings, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,6 +12,7 @@ const Sidebar = () => {
         { name: 'Dashboard', path: '/', icon: LayoutDashboard },
         { name: 'Agent Config', path: '/agent', icon: Bot },
         { name: 'Knowledge Base', path: '/knowledge', icon: BookOpen },
+        { name: 'Account Settings', path: '/profile', icon: Settings },
     ];
 
     return (
@@ -54,11 +55,26 @@ const Sidebar = () => {
 
             <div className="mt-auto w-full px-4 pt-8 border-t border-white/5 space-y-4">
                 {user && (
-                    <div className="px-4 py-2 text-sm text-textMuted bg-surfaceHighlight/50 rounded-xl">
-                        <span className="block text-white font-medium truncate">{user.name}</span>
-                        <span className="text-xs truncate">{user.email}</span>
-                    </div>
-                )}
+                        <Link
+                            to="/profile"
+                            className="flex items-center gap-3 p-3 rounded-xl bg-surfaceHighlight/40 hover:bg-surfaceHighlight/70 transition-all cursor-pointer"
+                        >
+                            {/* Avatar */}
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
+                            {user.name?.charAt(0).toUpperCase()}
+                            </div>
+
+                            {/* User Info */}
+                            <div className="flex flex-col overflow-hidden">
+                            <span className="text-sm font-medium text-white truncate">
+                                {user.name}
+                            </span>
+                            <span className="text-xs text-textMuted truncate">
+                                {user.email}
+                            </span>
+                            </div>
+                        </Link>
+                        )}
                 <button
                     onClick={() => {
                         logout();

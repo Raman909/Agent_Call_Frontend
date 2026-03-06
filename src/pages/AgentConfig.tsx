@@ -22,7 +22,7 @@ const AgentConfig = () => {
     const fetchAgents = async () => {
         try {
             const response = await api.get('/agents');
-            setAgents(response.data.agents);
+            setAgents(Array.isArray(response.data.agents) ? response.data.agents : []);
         } catch (error) {
             console.error('Failed to fetch agents', error);
             toast.error("Failed to load agents");
@@ -83,14 +83,16 @@ const AgentConfig = () => {
     };
 
     const handleEdit = (agent: any) => {
-        setEditingId(agent._id);
+setEditingId(agent._id);
 
-        setConfig({
-            name: agent.name,
-            prompt: agent.systemPrompt,
-            greeting: agent.greeting
-        });
-    };
+    setConfig({
+        name: agent.name || '',
+        prompt: agent.systemPrompt || '',
+        greeting: agent.greeting || ''
+    });
+
+    console.log("Editing agent:", agent);
+};
 
     const handleDelete = async (id: string) => {
         try {

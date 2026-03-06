@@ -1,5 +1,9 @@
 # Agent Vox 🎙️🤖
 
+![React](https://img.shields.io/badge/React-18-blue)
+![Vite](https://img.shields.io/badge/Vite-fast-purple)
+![Docker](https://img.shields.io/badge/Docker-ready-blue)
+
 **Agent Vox** is a modern, multi-tenant SaaS application that enables users to configure, manage, and deploy custom AI voice assistants. Integrating **Gemini Flash Native Audio**, **LiveKit**, and **Twilio**, users can build dedicated agents powered by customizable personalities, instructions, and contextual knowledge from uploaded PDFs.
 
 ---
@@ -76,3 +80,57 @@ The application handles Dynamic Multi-Tenant configurations across nodes.
 2. **Setup your agent**: Create boundaries and context.
 3. **Bring Your Own Twilio**: Every user has their own Twilio Webhook attached to their specific Twilio Number.
 4. **SIP Handshake**: The user dials the number, Twilio hits the backend, the backend figures out exactly *whose* agent it is and invokes an isolated LiveKit Cloud thread for them on-demand!
+
+
+---
+
+## 🐳 Running with Docker
+
+The frontend and backend run in separate repositories but can be started together using Docker Compose.
+
+Example project structure:
+
+```
+ai-voice-saas
+├── backend
+├── frontend
+└── docker-compose.yml
+```
+
+### Start containers
+
+From the project root:
+
+```bash
+docker compose up --build
+```
+
+### Access the application
+
+Frontend:
+
+```
+http://localhost:5173
+```
+
+Backend API:
+
+```
+http://localhost:5000
+```
+
+## 🧠 System Architecture
+
+User
+ ↓
+Frontend (React + Vite)
+ ↓
+Backend API (Node + Express)
+ ↓
+MongoDB
+ ↓
+Gemini AI (RAG)
+ ↓
+Voice Response (Twilio / LiveKit)
+
+---

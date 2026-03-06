@@ -20,5 +20,22 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+// 🚪 Response interceptor (auto logout if token expired)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log("Token expired → logging out");
+
+      // Remove token
+      localStorage.removeItem("token");
+
+      // Redirect to login
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default api;

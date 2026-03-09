@@ -9,11 +9,12 @@ const Sidebar = () => {
     const { logout, user } = useAuth();
 
     const links = [
-        { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-        { name: 'Agent Config', path: '/agent', icon: Bot },
-        { name: 'Knowledge Base', path: '/knowledge', icon: BookOpen },
-        { name: 'Account Settings', path: '/profile', icon: Settings },
-    ];
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Agents', path: '/agents', icon: Bot }, // Link to the Agents page where you can manage agents and remove KB
+    { name: 'Agent Config', path: '/agent', icon: Bot },
+    { name: 'Knowledge Base', path: '/knowledge', icon: BookOpen },
+    { name: 'Account Settings', path: '/profile', icon: Settings },
+];
 
     return (
         <aside className="w-64 h-screen glass-panel rounded-none border-y-0 border-l-0 border-r border-white/5 flex flex-col items-center py-8">

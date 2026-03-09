@@ -65,17 +65,27 @@ export const Login = () => {
                         />
                     </div>
 
-                    <div className="space-y-2">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
                         <label className="text-sm font-medium text-textMuted">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="input-field"
-                            placeholder="••••••••"
-                            required
-                        />
+
+                        <Link
+                            to="/forgot-password"
+                            className="text-xs text-primary hover:text-primaryHover transition-colors"
+                        >
+                            Forgot Password?
+                        </Link>
                     </div>
+
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="input-field"
+                        placeholder="••••••••"
+                        required
+                    />
+                </div>
 
                     <button type="submit" className="btn-primary w-full" disabled={isLoading}>
                         {isLoading ? (

@@ -103,7 +103,7 @@ const KnowledgeBase = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await api.post("/agents/upload", formData, {
+      await api.post("/agents/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (progressEvent) => {
           const percent = Math.round(
@@ -113,12 +113,11 @@ const KnowledgeBase = () => {
         },
       });
 
-      if (res.data.message) {
-        setUploadProgress(100);
-        fetchKB();
-      }
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Upload failed");
+      setUploadProgress(100);
+      fetchKB();
+
+    } catch {
+      // axios interceptor handles error toasts
       setUploadProgress(0);
     } finally {
       setIsUploading(false);
@@ -145,10 +144,8 @@ const KnowledgeBase = () => {
         agentId: selectedAgent,
         kbId,
       });
-
-      alert("Attached successfully ✅");
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Attach failed");
+    } catch {
+      // axios interceptor handles error toasts
     }
   };
 
@@ -160,11 +157,9 @@ const KnowledgeBase = () => {
 
     try {
       await api.delete(`/agents/kb/${kbId}`);
-      // Refresh the list after deletion
       setKbs(prev => prev.filter(kb => kb._id !== kbId));
-      alert("Deleted successfully");
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Delete failed");
+    } catch {
+      // axios interceptor handles error toasts
     }
   };
 
@@ -268,7 +263,6 @@ const KnowledgeBase = () => {
         ))}
       </select>
 
-      {/* KB LIST */}
       {/* KB LIST */}
       <div className="grid gap-4">
         {kbs.map((kb) => (

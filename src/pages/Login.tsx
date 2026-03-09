@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Bot, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { toast } from 'react-hot-toast'
 
 export const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -15,8 +15,6 @@ export const Login = () => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setError('');
-
         try {
             const response = await api.post('/users/login', { email, password });
 
@@ -24,21 +22,19 @@ export const Login = () => {
 
             if (data.token) {
                 login(data.token, data.user);
+                toast.success(data.message || 'Login successful'); // ✅ SUCCESS TOAST
                 navigate('/');
             } else {
-                setError(data.message || 'Failed to login');
+                toast.error(data.message || 'Login Failed'); // ❌ ERROR TOAST
             }
         } catch (err: any) {
-            if (err.response && err.response.data && err.response.data.message) {
-                setError(err.response.data.message);
-            } else {
-                setError('Network error. Is the backend running?');
-            }
+            const message= err.response?.data?.message || 'An error occurred during login';
+            toast.error(message); // ❌ ERROR TOAST
         } finally {
             setIsLoading(false);
         }
     };
-
+ 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
             <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
@@ -54,11 +50,7 @@ export const Login = () => {
                     <p className="text-textMuted mt-2">Sign in to your account</p>
                 </div>
 
-                {error && (
-                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg mb-6 text-sm">
-                        {error}
-                    </div>
-                )}
+               
 
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">

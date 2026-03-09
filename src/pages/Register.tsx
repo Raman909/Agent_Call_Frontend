@@ -8,7 +8,6 @@ export const Register = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -16,7 +15,6 @@ export const Register = () => {
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setError('');
 
         try {
             const response = await api.post('/users/register', { name, email, password });
@@ -32,15 +30,9 @@ export const Register = () => {
                 } else {
                     navigate('/login');
                 }
-            } else {
-                setError(data.message || 'Failed to register');
             }
-        } catch (err: any) {
-            if (err.response && err.response.data && err.response.data.message) {
-                setError(err.response.data.message);
-            } else {
-                setError('Network error. Is the backend running?');
-            }
+        } catch  {
+            // axios interceptor handles error toasts
         } finally {
             setIsLoading(false);
         }
@@ -61,11 +53,7 @@ export const Register = () => {
                     <p className="text-textMuted mt-2">Create a new account</p>
                 </div>
 
-                {error && (
-                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg mb-6 text-sm">
-                        {error}
-                    </div>
-                )}
+                
 
                 <form onSubmit={handleRegister} className="space-y-5">
                     <div className="space-y-2">

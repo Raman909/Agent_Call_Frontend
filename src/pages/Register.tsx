@@ -1,38 +1,61 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, UserPlus } from 'lucide-react';
+import { Bot, UserPlus, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { toast } from 'react-hot-toast';
 
 export const Register = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: ''
+    });
     const [isLoading, setIsLoading] = useState(false);
+    
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isLoading) return;
+
         setIsLoading(true);
-
         try {
-            const response = await api.post('/users/register', { name, email, password });
+            // 1. Register the user
+            const regRes = await api.post('/users/register', formData);
 
-            const data = response.data;
+            if (regRes.data?.user) {
+                // 2. Perform Auto-Login since register doesn't return a token
+                try {
+                    const loginRes = await api.post('/users/login', { 
+                        email: formData.email, 
+                        password: formData.password 
+                    });
 
-            if (data.user) {
-                // The teammate's backend does not return a token on registration, so auto-login now
-                const loginRes = await api.post('/users/login', { email, password });
-                if (loginRes.data && loginRes.data.token) {
-                    login(loginRes.data.token, loginRes.data.user);
-                    navigate('/');
-                } else {
+                    if (loginRes.data?.token) {
+                        login(loginRes.data.token, loginRes.data.user);
+                        toast.success('Account created! Welcome aboard.');
+                        navigate('/');
+                    } else {
+                        // Fallback if login fails but registration worked
+                        toast.success('Account created! Please sign in.');
+                        navigate('/login');
+                    }
+                } catch (loginErr) {
+                    // Registration worked, but auto-login failed
+                    toast.error('Account created, but auto-login failed. Please sign in manually.');
                     navigate('/login');
                 }
             }
-        } catch  {
-            // axios interceptor handles error toasts
+        } catch (err: any) {
+            // Interceptor handles most, but we stop loading here
+            const msg = err.response?.data?.message || 'Registration failed';
+            toast.error(msg);
         } finally {
             setIsLoading(false);
         }
@@ -40,10 +63,11 @@ export const Register = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+            {/* Ambient Background Blur */}
             <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="glass-panel p-8 w-full max-w-md z-10 animation-fade-in relative">
-                <div className="flex flex-col items-center mb-8">
+                <header className="flex flex-col items-center mb-8">
                     <div className="w-12 h-12 mb-4 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
                         <Bot className="w-7 h-7 text-white" />
                     </div>
@@ -51,17 +75,16 @@ export const Register = () => {
                         Agent Vox
                     </h1>
                     <p className="text-textMuted mt-2">Create a new account</p>
-                </div>
-
-                
+                </header>
 
                 <form onSubmit={handleRegister} className="space-y-5">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-textMuted">Full Name</label>
+                        <label className="text-sm font-medium text-textMuted ml-1">Full Name</label>
                         <input
+                            name="name"
                             type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            value={formData.name}
+                            onChange={handleChange}
                             className="input-field"
                             placeholder="John Doe"
                             required
@@ -69,11 +92,12 @@ export const Register = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-textMuted">Email Address</label>
+                        <label className="text-sm font-medium text-textMuted ml-1">Email Address</label>
                         <input
+                            name="email"
                             type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={formData.email}
+                            onChange={handleChange}
                             className="input-field"
                             placeholder="you@example.com"
                             required
@@ -81,33 +105,42 @@ export const Register = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-textMuted">Password</label>
+                        <label className="text-sm font-medium text-textMuted ml-1">Password</label>
                         <input
+                            name="password"
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={formData.password}
+                            onChange={handleChange}
                             className="input-field"
                             placeholder="••••••••"
                             required
                             minLength={6}
                         />
+                        <p className="text-[10px] text-textMuted px-1">Must be at least 6 characters.</p>
                     </div>
 
-                    <button type="submit" className="btn-primary w-full mt-2" disabled={isLoading}>
+                    <button 
+                        type="submit" 
+                        className="btn-primary w-full mt-2 py-3 flex items-center justify-center gap-2" 
+                        disabled={isLoading}
+                    >
                         {isLoading ? (
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                            <><UserPlus className="w-5 h-5" /> Create Account</>
+                            <>
+                                <UserPlus className="w-5 h-5" />
+                                <span>Create Account</span>
+                            </>
                         )}
                     </button>
                 </form>
 
-                <p className="text-center text-textMuted text-sm mt-8">
+                <footer className="text-center text-textMuted text-sm mt-8">
                     Already have an account?{' '}
                     <Link to="/login" className="text-primary hover:text-primaryHover font-medium transition-colors">
                         Sign in
                     </Link>
-                </p>
+                </footer>
             </div>
         </div>
     );

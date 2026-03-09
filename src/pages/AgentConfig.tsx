@@ -24,8 +24,7 @@ const AgentConfig = () => {
             const response = await api.get('/agents');
             setAgents(Array.isArray(response.data.agents) ? response.data.agents : []);
         } catch (error) {
-            console.error('Failed to fetch agents', error);
-            toast.error("Failed to load agents");
+            // toast.error("Failed to load agents");
         }
     };
 
@@ -35,24 +34,11 @@ const AgentConfig = () => {
 
         try {
             if (editingId) {
-
-                const res = await api.put(`/agents/${editingId}`, {
-                    name: config.name,
-                    systemPrompt: config.prompt,
-                    greeting: config.greeting
-                });
-
-                toast.success(res.data?.message || "Agent updated successfully");
-
+                await api.put(`/agents/${editingId}`, payload);
+                // toast.success("Agent updated");
             } else {
-
-                const res = await api.post('/agents', {
-                    name: config.name,
-                    systemPrompt: config.prompt,
-                    greeting: config.greeting
-                });
-
-                toast.success(res.data?.message || "Agent created successfully");
+                await api.post('/agents', payload);
+                // toast.success("Agent created");
             }
 
             setEditingId(null);
@@ -69,14 +55,7 @@ const AgentConfig = () => {
             setTimeout(() => setIsSaved(false), 3000);
 
         } catch (error: any) {
-
-            console.error('Failed to save agent config', error);
-
-            const message =
-                error.response?.data?.message || "Failed to save agent";
-
-            toast.error(message);
-
+            // toast.error(error.response?.data?.message || "Save failed");
         } finally {
             setIsLoading(false);
         }
@@ -96,21 +75,11 @@ setEditingId(agent._id);
 
     const handleDelete = async (id: string) => {
         try {
-
-            const res = await api.delete(`/agents/${id}`);
-
-            toast.success(res.data?.message || "Agent deleted successfully");
-
+            await api.delete(`/agents/${id}`);
+            // toast.success("Agent deleted");
             fetchAgents();
-
-        } catch (error: any) {
-
-            console.error("Failed to delete agent", error);
-
-            const message =
-                error.response?.data?.message || "Failed to delete agent";
-
-            toast.error(message);
+        } catch (error) {
+            // toast.error("Delete failed");
         }
     };
 

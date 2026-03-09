@@ -1,153 +1,135 @@
 import { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
-import { User, Lock, Loader2, Save } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { User } from "lucide-react";
 
 export default function Profile() {
-  const { user, login } = useAuth(); // Assuming login or a similar function updates user state
+  const { user } = useAuth();
 
-  // Profile State
-  const [profileData, setProfileData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-  });
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [name, setName] = useState(user?.name || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [loading, setLoading] = useState(false);
 
-  // Password State
-  const [passwords, setPasswords] = useState({
-    current: "",
-    new: "",
-  });
-  const [isPassLoading, setIsPassLoading] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-  // =========================
-  // HANDLERS
-  // =========================
-  
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!profileData.name || !profileData.email) return toast.error("Fields cannot be empty");
-
-    setIsProfileLoading(true);
+  const handleUpdate = async () => {
     try {
-      const { data } = await api.put("/users/update-profile", profileData);
-      
-      // Update the AuthContext so the Header/Sidebar name updates immediately
-      if (data.user) {
-        const token = localStorage.getItem("token");
-        if (token) login(token, data.user); 
-      }
+      setLoading(true);
 
-      toast.success("Profile updated successfully ✅");
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to update profile ❌");
+      await api.put("/users/update-profile", {
+        name,
+        email,
+      });
+
+      alert("Profile updated successfully ✅");
+    } catch (err) {
+      alert("Failed to update profile ❌");
     } finally {
-      setIsProfileLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwords.new.length < 6) return toast.error("New password must be at least 6 characters");
-
-    setIsPassLoading(true);
+  const handleChangePassword = async () => {
     try {
       await api.put("/users/change-password", {
-        currentPassword: passwords.current,
-        newPassword: passwords.new,
+        currentPassword,
+        newPassword,
       });
 
-      toast.success("Password updated successfully ✅");
-      setPasswords({ current: "", new: "" }); // Reset fields
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Password update failed ❌");
-    } finally {
-      setIsPassLoading(false);
+      alert("Password updated successfully ✅");
+
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (error) {
+      alert("Password update failed ❌");
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 mb-20 animation-fade-in p-4">
-      <div className="glass-panel p-8 rounded-2xl border border-white/10 shadow-2xl">
-        
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <User className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Account Settings</h1>
+    <div className="max-w-xl mx-auto mt-20">
+
+      <div className="glass-panel p-8 rounded-2xl border border-white/10">
+
+        {/* Title */}
+        <div className="flex items-center gap-3 mb-8">
+          <User className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold">Account Settings</h1>
         </div>
 
         {/* PROFILE SECTION */}
-        <form onSubmit={handleUpdateProfile} className="space-y-5">
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-textMuted mb-2">Personal Information</h2>
-          
-          <div className="space-y-1">
-            <label className="text-xs text-textMuted ml-1">Full Name</label>
+        <div className="space-y-4">
+
+          {/* Name */}
+          <div>
+            <label className="text-sm text-textMuted block mb-2">
+              Name
+            </label>
             <input
-              className="input-field"
-              value={profileData.name}
-              onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-              placeholder="John Doe"
+              className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs text-textMuted ml-1">Email Address</label>
+          {/* Email */}
+          <div>
+            <label className="text-sm text-textMuted block mb-2">
+              Email
+            </label>
             <input
-              className="input-field"
-              type="email"
-              value={profileData.email}
-              onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-              placeholder="john@example.com"
+              className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
+          {/* Update Profile Button */}
           <button
-            type="submit"
-            disabled={isProfileLoading}
-            className="btn-primary w-full py-3 mt-2"
+            onClick={handleUpdate}
+            disabled={loading}
+            className="w-full mt-4 bg-gradient-to-r from-primary to-accent text-white py-3 rounded-xl font-semibold hover:opacity-90 transition"
           >
-            {isProfileLoading ? <Loader2 className="animate-spin" /> : <><Save size={18} /> Update Profile</>}
+            {loading ? "Updating..." : "Update Profile"}
           </button>
-        </form>
 
-        <div className="border-t border-white/5 my-10" />
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-white/10 my-10"></div>
 
         {/* PASSWORD SECTION */}
-        <form onSubmit={handleChangePassword} className="space-y-5">
-          <div className="flex items-center gap-2 mb-2">
-            <Lock className="w-4 h-4 text-textMuted" />
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-textMuted">Security</h2>
-          </div>
+        <div className="space-y-4">
+
+          <h2 className="text-lg font-semibold">
+            Change Password
+          </h2>
 
           <input
             type="password"
             placeholder="Current Password"
-            className="input-field"
-            value={passwords.current}
-            required
-            onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+            className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
           />
 
           <input
             type="password"
             placeholder="New Password"
-            className="input-field"
-            value={passwords.new}
-            required
-            onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+            className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
           />
 
           <button
-            type="submit"
-            disabled={isPassLoading}
-            className="btn-secondary w-full py-3"
+            onClick={handleChangePassword}
+            className="w-full bg-primary py-3 rounded-xl text-white font-semibold hover:opacity-90 transition"
           >
-            {isPassLoading ? <Loader2 className="animate-spin" /> : "Change Password"}
+            Update Password
           </button>
-        </form>
+
+        </div>
+
       </div>
     </div>
   );

@@ -7,6 +7,9 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+
+import Profile from "./pages/Profile";
+
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -25,6 +28,7 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="agent" element={<AgentConfig />} />
               <Route path="knowledge" element={<KnowledgeBase />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
           </Route>
         </Routes>

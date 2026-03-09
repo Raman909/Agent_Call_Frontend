@@ -10,6 +10,7 @@ const Sidebar = () => {
 
     const links = [
         { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+        { name: 'Agents', path: '/agents', icon: Bot },
         { name: 'Agent Config', path: '/agent', icon: Bot },
         { name: 'Knowledge Base', path: '/knowledge', icon: BookOpen },
         { name: 'Account Settings', path: '/profile', icon: Settings },

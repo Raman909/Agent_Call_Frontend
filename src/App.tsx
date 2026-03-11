@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AgentConfig from './pages/AgentConfig';
+import AgentsPage from './pages/AgentsPage';
 import KnowledgeBase from './pages/KnowledgeBase';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -10,6 +11,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Agents from "./pages/Agents";
+import OutboundCall from "./pages/OutboundCall";
 
 import Profile from "./pages/Profile";
 
@@ -32,8 +34,10 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="agent" element={<AgentConfig />} />
+              <Route path="agents" element={<AgentsPage />} />
               <Route path="knowledge" element={<KnowledgeBase />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="/outbound-call" element={<OutboundCall />} />
               {/* //shows all agents and their kbs */}
               <Route path="agents" element={<Agents />} />
             </Route>

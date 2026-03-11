@@ -2,9 +2,12 @@ import { useState } from "react";
 import api from "../api/axios";
 import { toast } from "react-hot-toast";
 import { Bot } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,6 +27,16 @@ export default function ForgotPassword() {
 
       <div className="glass-panel p-8 w-full max-w-md z-10 animation-fade-in">
 
+              {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="text-sm text-textMuted hover:text-white mb-4"
+        >
+          ← Back to Login
+        </button>
+
+        
         <div className="flex flex-col items-center mb-6">
           <div className="w-12 h-12 mb-3 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
             <Bot className="w-7 h-7 text-white" />

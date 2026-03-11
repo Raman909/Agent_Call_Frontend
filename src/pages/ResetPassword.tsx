@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { toast } from "react-hot-toast";
 import { Bot } from "lucide-react";
 
 export default function ResetPassword() {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
 
@@ -18,6 +19,11 @@ export default function ResetPassword() {
       });
 
       toast.success(res.data.message || "Password reset successful");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Reset failed");
     }

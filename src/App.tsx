@@ -10,7 +10,6 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import Agents from "./pages/Agents";
 import OutboundCall from "./pages/OutboundCall";
 
 import Profile from "./pages/Profile";
@@ -38,8 +37,6 @@ function App() {
               <Route path="knowledge" element={<KnowledgeBase />} />
               <Route path="profile" element={<Profile />} />
               <Route path="/outbound-call" element={<OutboundCall />} />
-              {/* //shows all agents and their kbs */}
-              <Route path="agents" element={<Agents />} />
             </Route>
           </Route>
         </Routes>

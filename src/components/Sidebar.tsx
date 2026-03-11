@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Bot, BookOpen, User, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Bot, BookOpen, Settings, LogOut, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,6 +13,10 @@ const Sidebar = () => {
         { name: 'Agents', path: '/agents', icon: Bot },
         { name: 'Agent Config', path: '/agent', icon: Bot },
         { name: 'Knowledge Base', path: '/knowledge', icon: BookOpen },
+
+        // ⭐ Added outbound call
+        { name: 'Outbound Call', path: '/outbound-call', icon: Phone },
+
         { name: 'Account Settings', path: '/profile', icon: Settings },
     ];
 
@@ -36,8 +40,11 @@ const Sidebar = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'text-white' : 'text-textMuted hover:text-white hover:bg-white/5'
-                                }`}
+                            className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                                isActive
+                                    ? 'text-white'
+                                    : 'text-textMuted hover:text-white hover:bg-white/5'
+                            }`}
                         >
                             {isActive && (
                                 <motion.div
@@ -56,26 +63,25 @@ const Sidebar = () => {
 
             <div className="mt-auto w-full px-4 pt-8 border-t border-white/5 space-y-4">
                 {user && (
-                        <Link
-                            to="/profile"
-                            className="flex items-center gap-3 p-3 rounded-xl bg-surfaceHighlight/40 hover:bg-surfaceHighlight/70 transition-all cursor-pointer"
-                        >
-                            {/* Avatar */}
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
+                    <Link
+                        to="/profile"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-surfaceHighlight/40 hover:bg-surfaceHighlight/70 transition-all cursor-pointer"
+                    >
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
                             {user.name?.charAt(0).toUpperCase()}
-                            </div>
+                        </div>
 
-                            {/* User Info */}
-                            <div className="flex flex-col overflow-hidden">
+                        <div className="flex flex-col overflow-hidden">
                             <span className="text-sm font-medium text-white truncate">
                                 {user.name}
                             </span>
                             <span className="text-xs text-textMuted truncate">
                                 {user.email}
                             </span>
-                            </div>
-                        </Link>
-                        )}
+                        </div>
+                    </Link>
+                )}
+
                 <button
                     onClick={() => {
                         logout();

@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { User } from "lucide-react";
+import PasswordInput from "../components/PasswordInput";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -105,21 +106,19 @@ export default function Profile() {
             Change Password
           </h2>
 
-          <input
-            type="password"
-            placeholder="Current Password"
-            className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
+            <PasswordInput
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
+              placeholder="Current Password"
+            />
 
-          <input
-            type="password"
-            placeholder="New Password"
-            className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
+            <PasswordInput
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full p-3 rounded-lg bg-surfaceHighlight border border-white/10"
+              placeholder="New Password"
+            />
 
           <button
             onClick={handleChangePassword}

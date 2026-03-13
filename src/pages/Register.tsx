@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Bot, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import PasswordInput from "../components/PasswordInput";
 
 export const Register = () => {
     const [name, setName] = useState('');
@@ -82,8 +83,8 @@ export const Register = () => {
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-textMuted">Password</label>
-                        <input
-                            type="password"
+
+                        <PasswordInput
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="input-field"

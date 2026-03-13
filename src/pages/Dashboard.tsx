@@ -1,137 +1,209 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Save, Phone, Key, Shield, LogOut } from 'lucide-react';
-import api from '../api/axios';
-import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Phone, Database, Bot, ArrowRight } from "lucide-react";
+import api from "../api/axios";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
 
-  const [credentials, setCredentials] = useState({
-    accountSid: '',
-    authToken: '',
-    phoneNumber: '',
-  });
+  const [user, setUser] = useState<any>(null);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [kbList, setKbList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const response = await api.get('/users/me');
-        const user = response.data.user;
-        if (user && user.twilio) {
-          setCredentials({
-            accountSid: user.twilio.accountSid || '',
-            authToken: user.twilio.authToken || '',
-            phoneNumber: user.twilio.phoneNumber || '',
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch config', error);
-      }
-    };
-    fetchConfig();
-  }, []);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("HANDLE SAVE TRIGGERED");
-    setIsLoading(true);
+useEffect(() => {
+  const fetchDashboardData = async () => {
     try {
-      await api.post('/users/connect-twilio', credentials);
-      console.log("credential is saved")
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3000);
+      const userRes = await api.get("/users/me");
+      const agentsRes = await api.get("/agents");
+      const kbRes = await api.get("/agents/kb");
+      // console.log("KB RESPONSE:", kbRes.data);
+
+      setUser(userRes.data.user);
+      setAgents(agentsRes.data.agents || []);
+      setKbList(kbRes.data.kbs || []);
     } catch (error) {
-      console.error('Failed to save config', error);
+      console.error("Failed loading dashboard", error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  fetchDashboardData();
+}, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-3xl mx-auto animation-fade-in">
-      <div className="mb-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight mb-3">Twilio Configuration</h1>
-          <p className="text-textMuted text-lg">
-            Connect your Twilio account to enable telephony features for your AI agents.
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            logout();
-            navigate('/login');
-          }}
-          className="btn-secondary text-red-400 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/30 whitespace-nowrap"
-        >
-          <LogOut className="w-4 h-4 mr-1" /> Logout
-        </button>
+    <div className="max-w-6xl mx-auto animation-fade-in px-4 py-6 space-y-8">
+
+      {/* Greeting */}
+      <div>
+        <h1 className="text-3xl sm:text-4xl font-bold">
+          Hello {user?.name || "User"} 👋
+        </h1>
+
+        <p className="text-textMuted mt-2">
+          Welcome back. Manage your AI voice agents and knowledge bases here.
+        </p>
       </div>
 
-      <div className="glass-panel p-8">
-        <form onSubmit={handleSave} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-textMuted flex items-center gap-2">
-              <Shield className="w-4 h-4" /> Account SID
-            </label>
-            <input
-              type="text"
-              value={credentials.accountSid}
-              onChange={e => setCredentials({ ...credentials, accountSid: e.target.value })}
-              className="input-field"
-              placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              required
-            />
-          </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-textMuted flex items-center gap-2">
-              <Key className="w-4 h-4" /> Auth Token
-            </label>
-            <input
-              type="password"
-              value={credentials.authToken}
-              onChange={e => setCredentials({ ...credentials, authToken: e.target.value })}
-              className="input-field"
-              placeholder="••••••••••••••••••••••••••••••••"
-              required
-            />
-          </div>
+        {/* Twilio Status */}
+        <div className="glass-panel p-6 flex flex-col gap-4">
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-textMuted flex items-center gap-2">
-              <Phone className="w-4 h-4" /> Phone Number
-            </label>
-            <input
-              type="text"
-              value={credentials.phoneNumber}
-              onChange={e => setCredentials({ ...credentials, phoneNumber: e.target.value })}
-              className="input-field"
-              placeholder="+1234567890"
-              required
-            />
-          </div>
+          <Phone className="w-6 h-6 text-accent" />
 
-          <div className="pt-4 flex items-center justify-end gap-4">
-            {isSaved && <span className="text-accent text-sm font-medium">Successfully saved!</span>}
+          <h3 className="text-lg font-semibold">
+            Twilio Connection
+          </h3>
+
+          {user?.twilio?.phoneNumber ? (
+            <div className="text-sm text-textMuted">
+              <p>Connected Number</p>
+              <p className="text-white font-semibold mt-1">
+                {user.twilio.phoneNumber}
+              </p>
+            </div>
+          ) : (
             <button
-              type="submit"
-              className="btn-primary"
-              disabled={isLoading}
+              onClick={() => navigate("/twilio")}
+              className="btn-primary w-fit flex items-center gap-2"
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <><Save className="w-5 h-5" /> Save Credentials</>
-              )}
+              Configure
+              <ArrowRight className="w-4 h-4" />
             </button>
-          </div>
-        </form>
+          )}
+        </div>
+
+        {/* Knowledge Base Count */}
+        <div className="glass-panel p-6 flex flex-col gap-4">
+
+          <Database className="w-6 h-6 text-accent" />
+
+          <h3 className="text-lg font-semibold">
+            Knowledge Bases
+          </h3>
+
+          <p className="text-3xl font-bold">
+            {kbList.length}
+          </p>
+
+          <p className="text-xs text-textMuted">
+            PDFs used by agents
+          </p>
+
+        </div>
+
+        {/* Agent Count */}
+        <div className="glass-panel p-6 flex flex-col gap-4">
+
+          <Bot className="w-6 h-6 text-accent" />
+
+          <h3 className="text-lg font-semibold">
+            Agents
+          </h3>
+
+          <p className="text-3xl font-bold">
+            {agents.length}
+          </p>
+
+          <p className="text-xs text-textMuted">
+            AI voice agents created
+          </p>
+
+        </div>
+
       </div>
+
+      {/* Agent List */}
+      <div className="glass-panel p-6">
+
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-xl font-semibold">
+            Your Agents
+          </h2>
+
+          <button
+            onClick={() => navigate("/agents")}
+            className="text-accent text-sm hover:underline"
+          >
+            Manage Agents
+          </button>
+        </div>
+
+        {agents.length === 0 ? (
+          <p className="text-textMuted text-sm">
+            No agents created yet.
+          </p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            {agents.map((agent) => (
+              <div
+                key={agent._id}
+                className="p-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition"
+              >
+                <h3 className="font-semibold">
+                  {agent.name}
+                </h3>
+
+                <p className="text-xs text-textMuted mt-1">
+                  {agent.description || "AI voice assistant"}
+                </p>
+              </div>
+            ))}
+
+          </div>
+        )}
+
+      </div>
+
+      {/* Knowledge Base Section */}
+      <div className="glass-panel p-6">
+
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-xl font-semibold">
+            Knowledge Base Files
+          </h2>
+
+          <button
+            onClick={() => navigate("/knowledge")}
+            className="text-accent text-sm hover:underline"
+          >
+            Manage KB
+          </button>
+        </div>
+
+        {kbList.length === 0 ? (
+          <p className="text-textMuted text-sm">
+            No PDFs uploaded yet.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-3">
+
+            {kbList.slice(0, 6).map((kb) => (
+              <div
+                key={kb._id}
+                className="px-3 py-2 text-sm rounded-md bg-white/5 border border-white/10"
+              >
+                {kb.fileName || "Document"}
+              </div>
+            ))}
+
+          </div>
+        )}
+
+      </div>
+
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { Bot, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast'
+import PasswordInput from "../components/PasswordInput";
 
 export const Login = () => {
     const [email, setEmail] = useState('');
@@ -77,8 +78,7 @@ export const Login = () => {
                         </Link>
                     </div>
 
-                    <input
-                        type="password"
+                    <PasswordInput
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="input-field"

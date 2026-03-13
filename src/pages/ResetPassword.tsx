@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { toast } from "react-hot-toast";
 import { Bot } from "lucide-react";
+import PasswordInput from "../components/PasswordInput";
 
 export default function ResetPassword() {
   const { token } = useParams<{ token: string }>();
@@ -49,14 +50,13 @@ export default function ResetPassword() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          <input
-            type="password"
-            placeholder="Enter new password"
-            className="input-field"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field"
+                placeholder="Enter new password"
+                required
+              />
 
           <button className="btn-primary w-full">
             Reset Password

@@ -1,26 +1,27 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import AgentConfig from './pages/AgentConfig';
-import AgentsPage from './pages/AgentsPage';
-import KnowledgeBase from './pages/KnowledgeBase';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
+import AgentConfig from "./pages/AgentConfig";
+import AgentsPage from "./pages/AgentsPage";
+import KnowledgeBase from "./pages/KnowledgeBase";
+import TwilioConfig from "./pages/TwilioConfig";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import OutboundCall from "./pages/OutboundCall";
-
 import Profile from "./pages/Profile";
 
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Toaster position='top-right'/>
+        <Toaster position="top-right" />
+
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
@@ -32,11 +33,16 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
+
               <Route path="agent" element={<AgentConfig />} />
               <Route path="agents" element={<AgentsPage />} />
               <Route path="knowledge" element={<KnowledgeBase />} />
+
+              {/* NEW ROUTE */}
+              <Route path="twilio-config" element={<TwilioConfig />} />
+
               <Route path="profile" element={<Profile />} />
-              <Route path="/outbound-call" element={<OutboundCall />} />
+              <Route path="outbound-call" element={<OutboundCall />} />
             </Route>
           </Route>
         </Routes>

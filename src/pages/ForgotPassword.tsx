@@ -14,9 +14,9 @@ export default function ForgotPassword() {
 
     try {
       const res = await api.post("/users/forgot-password", { email });
-      toast.success(res.data.message || "Reset link sent");
+      // toast.success(res.data.message || "Reset link sent");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      // toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 

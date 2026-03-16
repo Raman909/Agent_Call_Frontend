@@ -67,11 +67,11 @@ export default function KnowledgeBase() {
         },
       });
 
-      toast.success("File uploaded");
+      // toast.success("File uploaded");
       fetchFiles();
 
     } catch {
-      toast.error("Upload failed");
+      // toast.error("Upload failed");
     }
 
     setUploading(false);
@@ -86,12 +86,12 @@ export default function KnowledgeBase() {
     try {
 
       await api.delete(`/agents/kb/${id}`);
-      toast.success("Knowledge base deleted");
+      // toast.success("Knowledge base deleted");
       fetchFiles();
 
     } catch {
 
-      toast.error("Delete failed");
+      // toast.error("Delete failed");
 
     }
 

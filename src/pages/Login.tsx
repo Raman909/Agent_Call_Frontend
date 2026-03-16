@@ -23,14 +23,14 @@ export const Login = () => {
 
             if (data.token) {
                 login(data.token, data.user);
-                toast.success(data.message || 'Login successful'); // ✅ SUCCESS TOAST
+                // toast.success(data.message || 'Login successful'); // ✅ SUCCESS TOAST
                 navigate('/');
             } else {
-                toast.error(data.message || 'Login Failed'); // ❌ ERROR TOAST
+                // toast.error(data.message || 'Login Failed'); // ❌ ERROR TOAST
             }
         } catch (err: any) {
             const message= err.response?.data?.message || 'An error occurred during login';
-            toast.error(message); // ❌ ERROR TOAST
+            // toast.error(message); // ❌ ERROR TOAST
         } finally {
             setIsLoading(false);
         }

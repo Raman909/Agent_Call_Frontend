@@ -18,9 +18,15 @@ interface Agent {
 }
 
 const AgentsPage = () => {
+
   const [agents, setAgents] = useState<Agent[]>([]);
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPrompt, setEditPrompt] = useState("");
+  const [editGreeting, setEditGreeting] = useState("");
 
   useEffect(() => {
     fetchAgents();
@@ -52,30 +58,57 @@ const AgentsPage = () => {
 
     try {
       await api.delete(`/agents/${id}`);
-      toast.success("Agent deleted");
+      // toast.success("Agent deleted");
       fetchAgents();
     } catch {
-      toast.error("Delete failed");
+      // toast.error("Delete failed");
     }
   };
 
   const attachKB = async (agentId: string, kbId: string) => {
     try {
       await api.post("/agents/attach-kb", { agentId, kbId });
-      toast.success("Knowledge base attached");
+      // toast.success("Knowledge base attached");
       fetchAgents();
     } catch {
-      toast.error("Attach failed");
+      // toast.error("Attach failed");
     }
   };
 
   const detachKB = async (agentId: string, kbId: string) => {
     try {
       await api.delete(`/agents/${agentId}/kb/${kbId}`);
-      toast.success("Detached");
+      // toast.success("Detached");
       fetchAgents();
     } catch {
-      toast.error("Detach failed");
+      // toast.error("Detach failed");
+    }
+  };
+
+  const handleEdit = (agent: Agent) => {
+    setEditingAgent(agent);
+    setEditName(agent.name);
+    setEditPrompt(agent.systemPrompt);
+    setEditGreeting(agent.greeting);
+  };
+
+  const updateAgent = async () => {
+    if (!editingAgent) return;
+
+    try {
+      await api.put(`/agents/${editingAgent._id}`, {
+        name: editName,
+        systemPrompt: editPrompt,
+        greeting: editGreeting
+      });
+
+      // toast.success("Agent updated");
+
+      setEditingAgent(null);
+
+      fetchAgents();
+    } catch {
+      // toast.error("Update failed");
     }
   };
 
@@ -133,7 +166,10 @@ const AgentsPage = () => {
 
               <div className="flex gap-1 shrink-0">
 
-                <button className="p-2 rounded-lg hover:bg-white/10 transition">
+                <button
+                  onClick={() => handleEdit(agent)}
+                  className="p-2 rounded-lg hover:bg-white/10 transition"
+                >
                   <Edit className="w-4 h-4 text-textMuted" />
                 </button>
 
@@ -218,7 +254,6 @@ const AgentsPage = () => {
 
               )}
 
-              {/* ATTACH DROPDOWN */}
               <select
                 className="input-field text-sm w-full"
                 defaultValue=""
@@ -257,20 +292,57 @@ const AgentsPage = () => {
 
       </div>
 
-      {/* EMPTY STATE */}
-      {agents.length === 0 && (
+      {/* EDIT MODAL */}
+      {editingAgent && (
 
-        <div className="text-center py-20">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 
-          <Bot className="w-16 h-16 mx-auto mb-4 text-textMuted" />
+          <div className="bg-surface p-6 rounded-xl w-full max-w-lg">
 
-          <h3 className="text-lg font-semibold mb-2">
-            No agents yet
-          </h3>
+            <h2 className="text-xl font-semibold mb-4">
+              Edit Agent
+            </h2>
 
-          <p className="text-textMuted text-sm">
-            Create your first AI agent to get started.
-          </p>
+            <input
+              className="input-field w-full mb-3"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Agent Name"
+            />
+
+            <textarea
+              className="input-field w-full mb-3"
+              value={editPrompt}
+              onChange={(e) => setEditPrompt(e.target.value)}
+              placeholder="System Prompt"
+            />
+
+            <textarea
+              className="input-field w-full mb-4"
+              value={editGreeting}
+              onChange={(e) => setEditGreeting(e.target.value)}
+              placeholder="Greeting"
+            />
+
+            <div className="flex justify-end gap-3">
+
+              <button
+                onClick={() => setEditingAgent(null)}
+                className="px-4 py-2 rounded bg-gray-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={updateAgent}
+                className="px-4 py-2 rounded bg-primary"
+              >
+                Save
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
 
